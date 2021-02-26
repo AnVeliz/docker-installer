@@ -18,7 +18,7 @@ const (
 	Linux        OsClass = "Linux"
 )
 
-// OsInfo is a storage of operationg system info
+// OsInfo is a storage of operating system info
 type OsInfo struct {
 	OsClass   OsClass
 	OsName    string
@@ -31,7 +31,7 @@ type UserInfo struct {
 	UserID int
 }
 
-// GetOsInfo returns operationg system info
+// GetOsInfo returns operating system info
 func GetOsInfo() (OsInfo, UserInfo) {
 	switch runtime.GOOS {
 	case "linux":

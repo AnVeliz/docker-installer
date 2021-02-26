@@ -1,142 +1,136 @@
 package docker
 
 import (
-	"fmt"
-	"os/exec"
-	"strings"
-
 	"github.com/AnVeliz/docker-installer/installers"
 	"github.com/AnVeliz/docker-installer/utils"
 )
 
-// IInstaller is an interface for docker installer
-type IInstaller interface {
-	installers.IAppInstaller
-}
+// dockerInstaller is an installer of Docker application
+type dockerInstaller struct {
+	uninstallCommand        utils.Command
+	updateRepositoryCommand []utils.Command
+	installCommand          utils.Command
+	checkCommand            utils.Command
 
-// Installer is an installer of Docker application
-type Installer struct {
-	IInstaller
-}
+	supportedOss []utils.OsInfo
 
-// Install Docker
-func (installer *Installer) Install() {
-	installer.Uninstall()
-	updateRepository()
-	installDocker()
-	checkDocker()
-}
-
-// Uninstall Docker
-func (installer *Installer) Uninstall() {
-	uninstall()
-}
-
-// SupportedOs Docker
-func (installer *Installer) SupportedOs() []utils.OsInfo {
-	return []utils.OsInfo{
-		{
-			OsClass:   utils.Linux,
-			OsName:    "Ubuntu",
-			OsVersion: "20.10",
-		},
-	}
+	commandRunner utils.ICommandRunner
 }
 
 // CreateInstaller creates Docker installer
-func CreateInstaller() IInstaller {
-	return &Installer{}
-}
+func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstaller {
+	return &dockerInstaller{
+		uninstallCommand: utils.Command{
+			ID: "UNINSTALL",
 
-func uninstall() {
-	fmt.Println("Trying to uninstall previous version...")
-	// sudo apt-get remove docker docker-engine docker.io containerd runc
-	uninstallOut, uninstallError := exec.Command("apt-get", "--yes", "--force-yes", "remove", "docker", "docker-engine", "docker.io", "containerd", "runc", "docker-ce", "docker-ce-cli", "containerd.io").Output()
+			WelcomeMessage: "Trying to uninstall old version...",
+			GoodbyMessage:  "Trying to uninstall old version... Done.",
+			Command:        "apt-get",
+			Arguments:      []string{"--yes", "--force-yes", "remove", "docker", "docker-engine", "docker.io", "containerd", "runc", "docker-ce", "docker-ce-cli", "containerd.io"},
+		},
+		updateRepositoryCommand: []utils.Command{
+			utils.Command{
+				ID: "UPDATE_REPOSITORY",
 
-	fmt.Println("-----\n", strings.TrimRight(strings.TrimLeft(string(uninstallOut), "\t \n"), "\t \n"), "\n-----")
-	fmt.Println("Trying to uninstall previous version... Done")
+				WelcomeMessage: "Updating repository...",
+				GoodbyMessage:  "Updating repository... Done.",
+				Command:        "apt-get",
+				Arguments:      []string{"update"},
+			},
+			utils.Command{
+				ID: "INSTALL_DEPENDENCIES",
 
-	if uninstallError != nil {
-		fmt.Println("Error when trying to uninstall odl version; ", uninstallError)
+				WelcomeMessage: "Installing dependencies...",
+				GoodbyMessage:  "Installing dependencies... Done.",
+				Command:        "apt-get",
+				Arguments:      []string{"--yes", "--force-yes", "install", "apt-transport-https", "ca-certificates", "curl", "gnupg-agent", "software-properties-common"},
+			},
+			utils.Command{
+				ID: "ADD_KEYS_REPOSITORY",
+
+				WelcomeMessage: "Adding keys repository...",
+				GoodbyMessage:  "Adding keys repository... Done.",
+				Command:        "bash",
+				Arguments:      []string{"-c", "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -"},
+			},
+			utils.Command{
+				ID: "ADD_KEYS_TO_REPOSITORY",
+
+				WelcomeMessage: "Adding GPG keys...",
+				GoodbyMessage:  "Adding GPG keys... Done.",
+				Command:        "bash",
+				Arguments:      []string{"-c", "-c", "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""},
+			},
+			utils.Command{
+				ID: "UPDATE_REPOSITORY",
+
+				WelcomeMessage: "Updating repository after all...",
+				GoodbyMessage:  "Updating repository after all... Done.",
+				Command:        "apt-get",
+				Arguments:      []string{"update"},
+			},
+		},
+		installCommand: utils.Command{
+			ID: "INSTALL_DOCKER",
+
+			WelcomeMessage: "Installing Docker...",
+			GoodbyMessage:  "Installing Docker... Done.",
+			Command:        "apt-get",
+			Arguments:      []string{"--yes", "--force-yes", "install", "docker-ce", "docker-ce-cli", "containerd.io"},
+		},
+		checkCommand: utils.Command{
+			ID: "CHECK_DOCKER",
+
+			WelcomeMessage: "Checking Docker...",
+			GoodbyMessage:  "Checking Docker... Done.",
+			Command:        "docker",
+			Arguments:      []string{"--version"},
+		},
+
+		supportedOss: []utils.OsInfo{
+			utils.OsInfo{
+				OsClass:   utils.Linux,
+				OsName:    "Ubuntu",
+				OsVersion: "20.10",
+			},
+		},
+
+		commandRunner: commandRunner,
 	}
 }
 
-func updateRepository() {
-	reloadRepository()
-	installDependencies()
-	installGpgkey()
-	addDockerRepository()
-	reloadRepository()
+// Install Docker
+func (installer *dockerInstaller) Install() {
+	installer.uninstall()
+	installer.updateRepository()
+	installer.installDocker()
+	installer.checkDocker()
 }
 
-func addDockerRepository() {
-	// sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-	fmt.Println("Trying to add Docker repository...")
-	addDockerRepositoryOut, addDockerRepositoryError := exec.Command("bash", "-c", "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"").Output()
-	fmt.Println(string(addDockerRepositoryOut))
-
-	if addDockerRepositoryError != nil {
-		fmt.Println("Error trying to add Docker repository; ", addDockerRepositoryError)
-	}
-	fmt.Println("Trying to add Docker repository... Done")
+// Uninstall Docker
+func (installer *dockerInstaller) Uninstall() {
+	installer.uninstall()
 }
 
-func installGpgkey() {
-	// curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-	fmt.Println("Trying to get and install gpg key...")
-	installGpgKeyOut, installGpgKeyError := exec.Command("bash", "-c", "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -").Output()
-	fmt.Println(string(installGpgKeyOut))
-
-	if installGpgKeyError != nil {
-		fmt.Println("Error when trying to get and install gpg key; ", installGpgKeyError)
-	}
-	fmt.Println("Trying to get and install gpg key... Done")
+// SupportedOs Docker
+func (installer *dockerInstaller) SupportedOs() []utils.OsInfo {
+	return installer.supportedOss
 }
 
-func installDependencies() {
-	// sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-	fmt.Println("Trying to install dependencies...")
-	installDependenciesOut, installDependenciesError := exec.Command("apt-get", "--yes", "--force-yes", "install", "apt-transport-https", "ca-certificates", "curl", "gnupg-agent", "software-properties-common").Output()
-	fmt.Println(string(installDependenciesOut))
-
-	if installDependenciesError != nil {
-		fmt.Println("Error when trying to install dependencies; ", installDependenciesError)
-	}
-	fmt.Println("Trying to install dependencies... Done")
+func (installer *dockerInstaller) uninstall() {
+	installer.commandRunner.Run(installer.uninstallCommand)
 }
 
-func reloadRepository() {
-	// sudo apt-get update
-	fmt.Println("Trying to reload the repository...")
-	reloadOut, reloadError := exec.Command("apt-get", "update").Output()
-	fmt.Println(string(reloadOut))
-
-	if reloadError != nil {
-		fmt.Println("Error when trying to reload odl version; ", reloadError)
+func (installer *dockerInstaller) updateRepository() {
+	for _, value := range installer.updateRepositoryCommand {
+		installer.commandRunner.Run(value)
 	}
-	fmt.Println("Trying to reload the repository... Done")
 }
 
-func installDocker() {
-	// sudo apt-get install docker-ce docker-ce-cli containerd.io
-	fmt.Println("Trying to install Docker...")
-	installationOut, installationError := exec.Command("apt-get", "--yes", "--force-yes", "install", "docker-ce", "docker-ce-cli", "containerd.io").Output()
-	fmt.Println(string(installationOut))
-
-	if installationError != nil {
-		fmt.Println("Error trying to install Docker; ", installationError)
-	}
-	fmt.Println("Trying to install Docker... Done")
+func (installer *dockerInstaller) installDocker() {
+	installer.commandRunner.Run(installer.installCommand)
 }
 
-func checkDocker() {
-	// sudo docker version
-	fmt.Println("Trying Docker...")
-	tryingOut, tryingError := exec.Command("docker", "--version").Output()
-	fmt.Println(string(tryingOut))
-
-	if tryingError != nil {
-		fmt.Println("Error trying Docker; ", tryingError)
-	}
-	fmt.Println("Trying tDocker... Done")
+func (installer *dockerInstaller) checkDocker() {
+	installer.commandRunner.Run(installer.checkCommand)
 }

@@ -43,8 +43,9 @@ func Run() {
 }
 
 func setupRegistry() installers.IRegistry {
+	commandsRunner := &utils.BashRunner{}
 	registry := installers.CreateRegistry()
-	registry.Register(docker.CreateInstaller())
+	registry.Register(docker.CreateInstaller(commandsRunner))
 	return registry
 }
 

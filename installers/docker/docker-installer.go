@@ -29,7 +29,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 			Arguments:      []string{"--yes", "--force-yes", "remove", "docker", "docker-engine", "docker.io", "containerd", "runc", "docker-ce", "docker-ce-cli", "containerd.io"},
 		},
 		updateRepositoryCommand: []utils.Command{
-			utils.Command{
+			{
 				ID: "UPDATE_REPOSITORY",
 
 				WelcomeMessage: "Updating repository...",
@@ -37,7 +37,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 				Command:        "apt-get",
 				Arguments:      []string{"update"},
 			},
-			utils.Command{
+			{
 				ID: "INSTALL_DEPENDENCIES",
 
 				WelcomeMessage: "Installing dependencies...",
@@ -45,7 +45,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 				Command:        "apt-get",
 				Arguments:      []string{"--yes", "--force-yes", "install", "apt-transport-https", "ca-certificates", "curl", "gnupg-agent", "software-properties-common"},
 			},
-			utils.Command{
+			{
 				ID: "ADD_KEYS_REPOSITORY",
 
 				WelcomeMessage: "Adding keys repository...",
@@ -53,7 +53,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 				Command:        "bash",
 				Arguments:      []string{"-c", "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -"},
 			},
-			utils.Command{
+			{
 				ID: "ADD_KEYS_TO_REPOSITORY",
 
 				WelcomeMessage: "Adding GPG keys...",
@@ -61,7 +61,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 				Command:        "bash",
 				Arguments:      []string{"-c", "-c", "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""},
 			},
-			utils.Command{
+			{
 				ID: "UPDATE_REPOSITORY",
 
 				WelcomeMessage: "Updating repository after all...",
@@ -88,7 +88,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 		},
 
 		supportedOss: []utils.OsInfo{
-			utils.OsInfo{
+			{
 				OsClass:   utils.Linux,
 				OsName:    "Ubuntu",
 				OsVersion: "20.10",

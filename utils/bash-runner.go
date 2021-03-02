@@ -29,7 +29,7 @@ func (runner BashRunner) Run(command Command) {
 		}
 	}
 
-	if message := command.GoodbyMessage; message != "" {
+	if message := command.GoodbyeMessage; message != "" {
 		fmt.Println("=====>", message)
 	}
 }

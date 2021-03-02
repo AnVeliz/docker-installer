@@ -11,7 +11,7 @@ type Command struct {
 	ID CommandID
 
 	WelcomeMessage string
-	GoodbyMessage  string
+	GoodbyeMessage string
 	ErrorAction    Action
 	SuccessAction  Action
 

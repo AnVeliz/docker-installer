@@ -24,7 +24,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 			ID: "UNINSTALL",
 
 			WelcomeMessage: "Trying to uninstall old version...",
-			GoodbyMessage:  "Trying to uninstall old version... Done.",
+			GoodbyeMessage: "Trying to uninstall old version... Done.",
 			Command:        "apt-get",
 			Arguments:      []string{"--yes", "--force-yes", "remove", "docker", "docker-engine", "docker.io", "containerd", "runc", "docker-ce", "docker-ce-cli", "containerd.io"},
 		},
@@ -33,7 +33,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 				ID: "UPDATE_REPOSITORY",
 
 				WelcomeMessage: "Updating repository...",
-				GoodbyMessage:  "Updating repository... Done.",
+				GoodbyeMessage: "Updating repository... Done.",
 				Command:        "apt-get",
 				Arguments:      []string{"update"},
 			},
@@ -41,7 +41,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 				ID: "INSTALL_DEPENDENCIES",
 
 				WelcomeMessage: "Installing dependencies...",
-				GoodbyMessage:  "Installing dependencies... Done.",
+				GoodbyeMessage: "Installing dependencies... Done.",
 				Command:        "apt-get",
 				Arguments:      []string{"--yes", "--force-yes", "install", "apt-transport-https", "ca-certificates", "curl", "gnupg-agent", "software-properties-common"},
 			},
@@ -49,7 +49,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 				ID: "ADD_KEYS_REPOSITORY",
 
 				WelcomeMessage: "Adding keys repository...",
-				GoodbyMessage:  "Adding keys repository... Done.",
+				GoodbyeMessage: "Adding keys repository... Done.",
 				Command:        "bash",
 				Arguments:      []string{"-c", "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -"},
 			},
@@ -57,7 +57,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 				ID: "ADD_KEYS_TO_REPOSITORY",
 
 				WelcomeMessage: "Adding GPG keys...",
-				GoodbyMessage:  "Adding GPG keys... Done.",
+				GoodbyeMessage: "Adding GPG keys... Done.",
 				Command:        "bash",
 				Arguments:      []string{"-c", "-c", "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""},
 			},
@@ -65,7 +65,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 				ID: "UPDATE_REPOSITORY",
 
 				WelcomeMessage: "Updating repository after all...",
-				GoodbyMessage:  "Updating repository after all... Done.",
+				GoodbyeMessage: "Updating repository after all... Done.",
 				Command:        "apt-get",
 				Arguments:      []string{"update"},
 			},
@@ -74,7 +74,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 			ID: "INSTALL_DOCKER",
 
 			WelcomeMessage: "Installing Docker...",
-			GoodbyMessage:  "Installing Docker... Done.",
+			GoodbyeMessage: "Installing Docker... Done.",
 			Command:        "apt-get",
 			Arguments:      []string{"--yes", "--force-yes", "install", "docker-ce", "docker-ce-cli", "containerd.io"},
 		},
@@ -82,7 +82,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 			ID: "CHECK_DOCKER",
 
 			WelcomeMessage: "Checking Docker...",
-			GoodbyMessage:  "Checking Docker... Done.",
+			GoodbyeMessage: "Checking Docker... Done.",
 			Command:        "docker",
 			Arguments:      []string{"--version"},
 		},

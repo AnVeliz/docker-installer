@@ -11,16 +11,14 @@ import (
 )
 
 // Run is a start point
-func Run() error {
-	osInfo, userInfo := system.GetOsInfo()
+func Run(osDetector system.IOsDetector, userInteractor user.Interactor) error {
+	osInfo, userInfo := osDetector.GetOsInfo()
 	if userInfo.UserID != 0 {
 		return errors.New("Application should run as root")
 	}
 
-	fmt.Println("Select option: \n\t[1] Install Docker\n\t[2] Uninstall Docker")
-
 	registry := setupRegistry()
-	operation, err := user.GetOperation()
+	operation, err := userInteractor.GetOperation()
 	if err != nil {
 		return err
 	}

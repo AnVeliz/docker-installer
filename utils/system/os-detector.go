@@ -31,8 +31,20 @@ type UserInfo struct {
 	UserID int
 }
 
+// IOsDetector is an interface for Os detection system
+type IOsDetector interface {
+	GetOsInfo() (OsInfo, UserInfo)
+}
+
+type osDetector struct{}
+
+// NewOsDetector is a factory for osDetector
+func NewOsDetector() IOsDetector {
+	return &osDetector{}
+}
+
 // GetOsInfo returns operating system info
-func GetOsInfo() (OsInfo, UserInfo) {
+func (osDetector osDetector) GetOsInfo() (OsInfo, UserInfo) {
 	switch runtime.GOOS {
 	case "linux":
 		osName, osVersion := getLinuxVersion()

@@ -8,8 +8,23 @@ import (
 	"github.com/AnVeliz/docker-installer/installers"
 )
 
+// Interactor is for interaction with users
+type Interactor interface {
+	GetOperation() (installers.OperationType, error)
+}
+
+type interactor struct {
+}
+
+// NewInteractor returns a user interactor implementation
+func NewInteractor() Interactor {
+	return &interactor{}
+}
+
 // GetOperation asks for the operation user is going to perform
-func GetOperation() (installers.OperationType, error) {
+func (intrct interactor) GetOperation() (installers.OperationType, error) {
+	fmt.Println("Select option: \n\t[1] Install Docker\n\t[2] Uninstall Docker")
+
 	reader := bufio.NewReader(os.Stdin)
 	char, _, err := reader.ReadRune()
 
@@ -29,6 +44,6 @@ func GetOperation() (installers.OperationType, error) {
 		return installers.Uninstall, nil
 	default:
 		fmt.Println("Wrong input. You need to choose 1 or 2")
-		return GetOperation()
+		return intrct.GetOperation()
 	}
 }

@@ -6,14 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/AnVeliz/docker-installer/utils"
+	"github.com/AnVeliz/docker-installer/utils/system"
 )
 
 type fakeCommandRunner struct {
 	fullOutput []string
 }
 
-func (commandRunner *fakeCommandRunner) Run(command utils.Command) {
+func (commandRunner *fakeCommandRunner) Run(command system.Command) {
 	commandString := command.Command + " " + strings.Join(command.Arguments, " ")
 	commandRunner.fullOutput = append(commandRunner.fullOutput, commandString)
 }
@@ -24,9 +24,9 @@ func TestSupportedOss(t *testing.T) {
 	dockerInstaller := CreateInstaller(&fakeCommandRunner{})
 	operatingSystems := dockerInstaller.SupportedOs()
 
-	expected := []utils.OsInfo{
+	expected := []system.OsInfo{
 		{
-			OsClass:   utils.Linux,
+			OsClass:   system.Linux,
 			OsName:    "Ubuntu",
 			OsVersion: "20.10",
 		},

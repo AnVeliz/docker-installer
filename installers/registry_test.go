@@ -4,30 +4,30 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/AnVeliz/docker-installer/utils"
+	"github.com/AnVeliz/docker-installer/utils/system"
 )
 
 type dummyInstaller struct {
-	osInfo []utils.OsInfo
+	osInfo []system.OsInfo
 }
 
 func (installer *dummyInstaller) Install() {}
 
 func (installer *dummyInstaller) Uninstall() {}
 
-func (installer *dummyInstaller) SupportedOs() []utils.OsInfo {
+func (installer *dummyInstaller) SupportedOs() []system.OsInfo {
 	return installer.osInfo
 }
 
 func TestRegistryAndFind(t *testing.T) {
-	dummyOsVersion := utils.OsInfo{
-		OsClass:   utils.Linux,
+	dummyOsVersion := system.OsInfo{
+		OsClass:   system.Linux,
 		OsName:    "Ubuntu",
 		OsVersion: "21.10",
 	}
 
 	dummyInstaller := &dummyInstaller{
-		osInfo: []utils.OsInfo{
+		osInfo: []system.OsInfo{
 			dummyOsVersion,
 		},
 	}
@@ -44,9 +44,9 @@ func TestRegistryAndFind(t *testing.T) {
 
 func TestRegistryAndFindDifferentVersion(t *testing.T) {
 	dummyInstaller := &dummyInstaller{
-		osInfo: []utils.OsInfo{
+		osInfo: []system.OsInfo{
 			{
-				OsClass:   utils.Linux,
+				OsClass:   system.Linux,
 				OsName:    "Ubuntu",
 				OsVersion: "21.10",
 			},
@@ -56,8 +56,8 @@ func TestRegistryAndFindDifferentVersion(t *testing.T) {
 	registry := CreateRegistry()
 	registry.Register(dummyInstaller)
 
-	dummyOsVersion := utils.OsInfo{
-		OsClass:   utils.Linux,
+	dummyOsVersion := system.OsInfo{
+		OsClass:   system.Linux,
 		OsName:    "Ubuntu",
 		OsVersion: "10.00",
 	}

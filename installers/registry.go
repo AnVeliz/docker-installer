@@ -1,15 +1,15 @@
 package installers
 
-import (
-	"github.com/AnVeliz/docker-installer/utils"
-)
+import "github.com/AnVeliz/docker-installer/utils/system"
 
 // OperationType is an alias for operation types
 type OperationType int
 
 const (
+	// NotSpecified means that it hasn't been set
+	NotSpecified OperationType = iota
 	// Install for installation
-	Install OperationType = iota
+	Install
 	// Uninstall for deinstallation
 	Uninstall
 )
@@ -17,7 +17,7 @@ const (
 // IRegistry is an interface of registry
 type IRegistry interface {
 	Register(installer IAppInstaller)
-	FindInstaller(osInfo utils.OsInfo) IAppInstaller
+	FindInstaller(osInfo system.OsInfo) IAppInstaller
 }
 
 // Registry contains all installers
@@ -33,7 +33,7 @@ func (registry *Registry) Register(installer IAppInstaller) {
 }
 
 // FindInstaller looks up for an appropriate installer
-func (registry *Registry) FindInstaller(osInfo utils.OsInfo) IAppInstaller {
+func (registry *Registry) FindInstaller(osInfo system.OsInfo) IAppInstaller {
 	for _, currentInstaller := range registry.installers {
 		currentInstallerSupportedOs := currentInstaller.SupportedOs()
 		for _, currentSupportedOs := range currentInstallerSupportedOs {

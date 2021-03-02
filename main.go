@@ -6,5 +6,8 @@ import (
 
 func main() {
 	fmt.Println("Welcome to Docker installer!")
-	Run()
+	err := Run()
+	if err != nil {
+		fmt.Println("Error while running: ", err.Error())
+	}
 }

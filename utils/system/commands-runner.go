@@ -1,4 +1,4 @@
-package utils
+package system
 
 // Action is a callback for a function call result
 type Action func()

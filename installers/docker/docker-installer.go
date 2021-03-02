@@ -2,25 +2,25 @@ package docker
 
 import (
 	"github.com/AnVeliz/docker-installer/installers"
-	"github.com/AnVeliz/docker-installer/utils"
+	"github.com/AnVeliz/docker-installer/utils/system"
 )
 
 // dockerInstaller is an installer of Docker application
 type dockerInstaller struct {
-	uninstallCommand        utils.Command
-	updateRepositoryCommand []utils.Command
-	installCommand          utils.Command
-	checkCommand            utils.Command
+	uninstallCommand        system.Command
+	updateRepositoryCommand []system.Command
+	installCommand          system.Command
+	checkCommand            system.Command
 
-	supportedOss []utils.OsInfo
+	supportedOss []system.OsInfo
 
-	commandRunner utils.ICommandRunner
+	commandRunner system.ICommandRunner
 }
 
 // CreateInstaller creates Docker installer
-func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstaller {
+func CreateInstaller(commandRunner system.ICommandRunner) installers.IAppInstaller {
 	return &dockerInstaller{
-		uninstallCommand: utils.Command{
+		uninstallCommand: system.Command{
 			ID: "UNINSTALL",
 
 			WelcomeMessage: "Trying to uninstall old version...",
@@ -28,7 +28,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 			Command:        "apt-get",
 			Arguments:      []string{"--yes", "--force-yes", "remove", "docker", "docker-engine", "docker.io", "containerd", "runc", "docker-ce", "docker-ce-cli", "containerd.io"},
 		},
-		updateRepositoryCommand: []utils.Command{
+		updateRepositoryCommand: []system.Command{
 			{
 				ID: "UPDATE_REPOSITORY",
 
@@ -70,7 +70,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 				Arguments:      []string{"update"},
 			},
 		},
-		installCommand: utils.Command{
+		installCommand: system.Command{
 			ID: "INSTALL_DOCKER",
 
 			WelcomeMessage: "Installing Docker...",
@@ -78,7 +78,7 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 			Command:        "apt-get",
 			Arguments:      []string{"--yes", "--force-yes", "install", "docker-ce", "docker-ce-cli", "containerd.io"},
 		},
-		checkCommand: utils.Command{
+		checkCommand: system.Command{
 			ID: "CHECK_DOCKER",
 
 			WelcomeMessage: "Checking Docker...",
@@ -87,9 +87,9 @@ func CreateInstaller(commandRunner utils.ICommandRunner) installers.IAppInstalle
 			Arguments:      []string{"--version"},
 		},
 
-		supportedOss: []utils.OsInfo{
+		supportedOss: []system.OsInfo{
 			{
-				OsClass:   utils.Linux,
+				OsClass:   system.Linux,
 				OsName:    "Ubuntu",
 				OsVersion: "20.10",
 			},
@@ -113,7 +113,7 @@ func (installer *dockerInstaller) Uninstall() {
 }
 
 // SupportedOs Docker
-func (installer *dockerInstaller) SupportedOs() []utils.OsInfo {
+func (installer *dockerInstaller) SupportedOs() []system.OsInfo {
 	return installer.supportedOss
 }
 

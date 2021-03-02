@@ -45,8 +45,7 @@ func Run(registry installers.IRegistry, osDetector system.IOsDetector, userInter
 }
 
 // SetupRegistry is for creating a registry with real installers
-func SetupRegistry() installers.IRegistry {
-	commandsRunner := &system.BashRunner{}
+func SetupRegistry(commandsRunner system.IRunner) installers.IRegistry {
 	registry := installers.CreateRegistry()
 	registry.Register(docker.CreateInstaller(commandsRunner))
 	return registry

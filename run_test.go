@@ -68,6 +68,12 @@ func (installer *dummyInstaller) SupportedOs() []system.OsInfo {
 	return installer.osInfo
 }
 
+type fakeBashRunner struct {
+}
+
+func (runner fakeBashRunner) Run(command system.Command) {
+}
+
 var rightSingleOsRegistry installers.IRegistry = fakeRegistry{
 	installer: &dummyInstaller{
 		osInfo: []system.OsInfo{
@@ -255,7 +261,7 @@ func TestUserOsDetectorError(t *testing.T) {
 }
 
 func TestSetupRegistry(t *testing.T) {
-	registry := SetupRegistry()
+	registry := SetupRegistry(fakeBashRunner{})
 	installer := registry.FindInstaller(system.OsInfo{
 		OsClass:   system.Linux,
 		OsVersion: "20.10",

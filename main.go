@@ -7,10 +7,11 @@ import (
 )
 
 func main() {
-	userInteractor := user.NewInteractor(interactivity.NewIO())
+	ioInteractor := interactivity.NewIO()
+	userInteractor := user.NewInteractor(ioInteractor)
 
 	userInteractor.IO().PrintMessage("Welcome to Docker installer!")
-	err := Run(SetupRegistry(), system.NewOsDetector(), userInteractor)
+	err := Run(SetupRegistry(system.NewBashRunner(ioInteractor)), system.NewOsDetector(), userInteractor)
 	if err != nil {
 		userInteractor.IO().PrintMessage("Error while running: ", err.Error())
 	}

@@ -2,40 +2,53 @@ package system
 
 import (
 	"bufio"
-	"fmt"
 	"os/exec"
+
+	"github.com/AnVeliz/docker-installer/utils/system/interactivity"
 )
 
-// BashRunner is a commands runner which runs commands in Bash
-type BashRunner struct {
+// IRunner is an interface of commands runner which runs commands
+type IRunner interface {
+	Run(command Command)
+}
+
+type bashRunner struct {
+	io interactivity.IO
+}
+
+// NewBashRunner creates an instance of bashRunner
+func NewBashRunner(userIO interactivity.IO) IRunner {
+	return &bashRunner{
+		io: userIO,
+	}
 }
 
 // Run executes a command
-func (runner BashRunner) Run(command Command) {
+func (runner bashRunner) Run(command Command) {
 	if message := command.WelcomeMessage; message != "" {
-		fmt.Println("=====>", message)
+		runner.io.PrintMessage("=====>", message)
 	}
 
-	err := execute(command.Command, command.Arguments...)
+	err := runner.execute(command.Command, command.Arguments...)
 	if err != nil {
-		fmt.Println("[===ERROR===]", err)
+		runner.io.PrintMessage("[===ERROR===]", err.Error())
 		if action := command.ErrorAction; action != nil {
 			action()
 		}
 	} else {
-		fmt.Println("[Done]")
+		runner.io.PrintMessage("[Done]")
 		if action := command.SuccessAction; action != nil {
 			action()
 		}
 	}
 
 	if message := command.GoodbyeMessage; message != "" {
-		fmt.Println("=====>", message)
+		runner.io.PrintMessage("=====>", message)
 	}
 }
 
 // execute command functionality
-func execute(command string, arguments ...string) error {
+func (runner bashRunner) execute(command string, arguments ...string) error {
 	cmd := exec.Command(command, arguments...)
 
 	stdout, _ := cmd.StdoutPipe()
@@ -44,7 +57,7 @@ func execute(command string, arguments ...string) error {
 	commandOutputScanner := bufio.NewScanner(stdout)
 	for commandOutputScanner.Scan() {
 		message := commandOutputScanner.Text()
-		fmt.Println(message)
+		runner.io.PrintMessage(message)
 	}
 
 	return cmd.Wait()

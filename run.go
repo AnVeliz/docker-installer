@@ -10,7 +10,7 @@ import (
 )
 
 // Run is a start point
-func Run(osDetector system.IOsDetector, userInteractor user.Interactor) error {
+func Run(registry installers.IRegistry, osDetector system.IOsDetector, userInteractor user.Interactor) error {
 	osInfo, userInfo, err := osDetector.GetOsInfo()
 	if err != nil {
 		return err
@@ -19,7 +19,6 @@ func Run(osDetector system.IOsDetector, userInteractor user.Interactor) error {
 		return errors.New("Application should run as root")
 	}
 
-	registry := setupRegistry()
 	operation, err := userInteractor.GetOperation()
 	if err != nil {
 		return err
@@ -45,7 +44,8 @@ func Run(osDetector system.IOsDetector, userInteractor user.Interactor) error {
 	return nil
 }
 
-func setupRegistry() installers.IRegistry {
+// SetupRegistry is for creating a registry with real installers
+func SetupRegistry() installers.IRegistry {
 	commandsRunner := &system.BashRunner{}
 	registry := installers.CreateRegistry()
 	registry.Register(docker.CreateInstaller(commandsRunner))

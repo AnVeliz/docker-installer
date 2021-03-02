@@ -45,6 +45,43 @@ func (fakeInteractor fakeIoInteractor) GetRune() (rune, error) {
 	return fakeInteractor.rn, fakeInteractor.err
 }
 
+type fakeRegistry struct {
+	installer installers.IAppInstaller
+}
+
+func (registry fakeRegistry) Register(installer installers.IAppInstaller) {
+}
+
+func (registry fakeRegistry) FindInstaller(osInfo system.OsInfo) installers.IAppInstaller {
+	return registry.installer
+}
+
+type dummyInstaller struct {
+	osInfo []system.OsInfo
+}
+
+func (installer *dummyInstaller) Install() {}
+
+func (installer *dummyInstaller) Uninstall() {}
+
+func (installer *dummyInstaller) SupportedOs() []system.OsInfo {
+	return installer.osInfo
+}
+
+var rightSingleOsRegistry installers.IRegistry = fakeRegistry{
+	installer: &dummyInstaller{
+		osInfo: []system.OsInfo{
+			{
+				OsClass:   system.Linux,
+				OsVersion: "20.10",
+				OsName:    "Ubuntu",
+			},
+		},
+	},
+}
+
+var notFoundOsRegistry installers.IRegistry = fakeRegistry{}
+
 func TestInstallSupportedOss(t *testing.T) {
 	detector := fakeOsDetector{
 		fakeOsInfo: system.OsInfo{
@@ -63,7 +100,7 @@ func TestInstallSupportedOss(t *testing.T) {
 		err:           nil,
 	}
 
-	err := Run(detector, interactor)
+	err := Run(rightSingleOsRegistry, detector, interactor)
 	if err != nil {
 		t.Error("Run function result is wrong:", err.Error())
 	}
@@ -87,7 +124,7 @@ func TestInstallNotSupportedUser(t *testing.T) {
 		err:           nil,
 	}
 
-	err := Run(detector, interactor)
+	err := Run(rightSingleOsRegistry, detector, interactor)
 	if err == nil || err.Error() != "Application should run as root" {
 		t.Error("Run function result is wrong:", err.Error())
 	}
@@ -111,7 +148,7 @@ func TestInstallNotSupportedOss(t *testing.T) {
 		err:           nil,
 	}
 
-	err := Run(detector, interactor)
+	err := Run(notFoundOsRegistry, detector, interactor)
 	if err == nil || err.Error() != "No compatible installer has been found" {
 		t.Error("Run function result is wrong:", err.Error())
 	}
@@ -135,7 +172,7 @@ func TestUninstallSupportedOss(t *testing.T) {
 		err:           nil,
 	}
 
-	err := Run(detector, interactor)
+	err := Run(rightSingleOsRegistry, detector, interactor)
 	if err != nil {
 		t.Error("Run function result is wrong:", err.Error())
 	}
@@ -159,7 +196,7 @@ func TestNotSpecifiedOperationSupportedOss(t *testing.T) {
 		err:           nil,
 	}
 
-	err := Run(detector, interactor)
+	err := Run(rightSingleOsRegistry, detector, interactor)
 	if err == nil || err.Error() != "Unexpected operation requested" {
 		t.Error("Run function result is wrong:", err.Error())
 	}
@@ -185,7 +222,7 @@ func TestUserInputError(t *testing.T) {
 		err:           errors.New(errMsg),
 	}
 
-	err := Run(detector, interactor)
+	err := Run(rightSingleOsRegistry, detector, interactor)
 	if err == nil || err.Error() != errMsg {
 		t.Error("Run function result is wrong:", err.Error())
 	}
@@ -211,8 +248,21 @@ func TestUserOsDetectorError(t *testing.T) {
 		err:           nil,
 	}
 
-	err := Run(detector, interactor)
+	err := Run(rightSingleOsRegistry, detector, interactor)
 	if err == nil || err.Error() != errMsg {
 		t.Error("Run function result is wrong:", err.Error())
+	}
+}
+
+func TestSetupRegistry(t *testing.T) {
+	registry := SetupRegistry()
+	installer := registry.FindInstaller(system.OsInfo{
+		OsClass:   system.Linux,
+		OsVersion: "20.10",
+		OsName:    "Ubuntu",
+	})
+
+	if installer == nil {
+		t.Error("Registry Setup is not correct")
 	}
 }

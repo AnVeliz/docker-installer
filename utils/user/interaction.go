@@ -32,10 +32,6 @@ func (intrct interactor) GetOperation() (installers.OperationType, error) {
 		return installers.NotSpecified, err
 	}
 
-	if char == '1' {
-		return installers.Install, nil
-	}
-
 	switch char {
 	case '1':
 		return installers.Install, nil

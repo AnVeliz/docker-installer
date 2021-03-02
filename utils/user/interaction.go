@@ -1,8 +1,6 @@
 package user
 
 import (
-	"fmt"
-
 	"github.com/AnVeliz/docker-installer/installers"
 	"github.com/AnVeliz/docker-installer/utils/system/interactivity"
 )
@@ -31,7 +29,6 @@ func (intrct interactor) GetOperation() (installers.OperationType, error) {
 	char, err := intrct.io.GetRune()
 
 	if err != nil {
-		fmt.Println(err)
 		return installers.NotSpecified, err
 	}
 

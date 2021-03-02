@@ -1,16 +1,17 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/AnVeliz/docker-installer/utils/system"
+	"github.com/AnVeliz/docker-installer/utils/system/interactivity"
 	"github.com/AnVeliz/docker-installer/utils/user"
 )
 
 func main() {
-	fmt.Println("Welcome to Docker installer!")
-	err := Run(system.NewOsDetector(), user.NewInteractor())
+	userInteractor := user.NewInteractor(interactivity.NewIO())
+
+	userInteractor.IO().PrintMessage("Welcome to Docker installer!")
+	err := Run(system.NewOsDetector(), userInteractor)
 	if err != nil {
-		fmt.Println("Error while running: ", err.Error())
+		userInteractor.IO().PrintMessage("Error while running: ", err.Error())
 	}
 }

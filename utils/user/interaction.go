@@ -1,32 +1,34 @@
 package user
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 
 	"github.com/AnVeliz/docker-installer/installers"
+	"github.com/AnVeliz/docker-installer/utils/system/interactivity"
 )
 
 // Interactor is for interaction with users
 type Interactor interface {
 	GetOperation() (installers.OperationType, error)
+	IO() interactivity.IO
 }
 
 type interactor struct {
+	io interactivity.IO
 }
 
 // NewInteractor returns a user interactor implementation
-func NewInteractor() Interactor {
-	return &interactor{}
+func NewInteractor(ioInteractor interactivity.IO) Interactor {
+	return &interactor{
+		io: ioInteractor,
+	}
 }
 
 // GetOperation asks for the operation user is going to perform
 func (intrct interactor) GetOperation() (installers.OperationType, error) {
-	fmt.Println("Select option: \n\t[1] Install Docker\n\t[2] Uninstall Docker")
+	intrct.io.PrintMessage("Select option: \n\t[1] Install Docker\n\t[2] Uninstall Docker")
 
-	reader := bufio.NewReader(os.Stdin)
-	char, _, err := reader.ReadRune()
+	char, err := intrct.io.GetRune()
 
 	if err != nil {
 		fmt.Println(err)
@@ -43,7 +45,11 @@ func (intrct interactor) GetOperation() (installers.OperationType, error) {
 	case '2':
 		return installers.Uninstall, nil
 	default:
-		fmt.Println("Wrong input. You need to choose 1 or 2")
+		intrct.io.PrintMessage("Wrong input. You need to choose 1 or 2")
 		return intrct.GetOperation()
 	}
+}
+
+func (intrct interactor) IO() interactivity.IO {
+	return intrct.io
 }

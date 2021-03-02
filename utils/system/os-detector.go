@@ -1,7 +1,7 @@
 package system
 
 import (
-	"fmt"
+	"errors"
 	"os"
 	"os/exec"
 	"runtime"
@@ -33,7 +33,7 @@ type UserInfo struct {
 
 // IOsDetector is an interface for Os detection system
 type IOsDetector interface {
-	GetOsInfo() (OsInfo, UserInfo)
+	GetOsInfo() (OsInfo, UserInfo, error)
 }
 
 type osDetector struct{}
@@ -44,11 +44,19 @@ func NewOsDetector() IOsDetector {
 }
 
 // GetOsInfo returns operating system info
-func (osDetector osDetector) GetOsInfo() (OsInfo, UserInfo) {
+func (osDetector osDetector) GetOsInfo() (OsInfo, UserInfo, error) {
 	switch runtime.GOOS {
 	case "linux":
-		osName, osVersion := getLinuxVersion()
-		userName, userID := getProcessOwner()
+		osName, osVersion, versionErr := getLinuxVersion()
+		if versionErr != nil {
+			return OsInfo{}, UserInfo{}, versionErr
+		}
+
+		userName, userID, procOwnerErr := getProcessOwner()
+		if procOwnerErr != nil {
+			return OsInfo{}, UserInfo{}, procOwnerErr
+		}
+
 		return OsInfo{
 				OsClass:   Linux,
 				OsName:    osName,
@@ -56,29 +64,29 @@ func (osDetector osDetector) GetOsInfo() (OsInfo, UserInfo) {
 			}, UserInfo{
 				Name:   userName,
 				UserID: userID,
-			}
+			},
+			nil
 	default:
 		return OsInfo{
 			OsClass: NotSupported,
-		}, UserInfo{}
+		}, UserInfo{}, nil
 	}
 }
 
-func getLinuxVersion() (string, string) {
+func getLinuxVersion() (string, string, error) {
 	nameOut, nameError := exec.Command("lsb_release", "-si").Output()
 	versionOut, versionError := exec.Command("lsb_release", "-sr").Output()
 	if nameError != nil || versionError != nil {
-		fmt.Println("Error during execution lsb_release")
+		return "", "", errors.New("Error during execution lsb_release")
 	}
 
-	return strings.Trim(string(nameOut), "\t \n"), strings.Trim(string(versionOut), "\t \n")
+	return strings.Trim(string(nameOut), "\t \n"), strings.Trim(string(versionOut), "\t \n"), nil
 }
 
-func getProcessOwner() (string, int) {
+func getProcessOwner() (string, int, error) {
 	stdout, err := exec.Command("ps", "-o", "user=", "-p", strconv.Itoa(os.Getpid())).Output()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(5)
+		return "", -1, err
 	}
-	return string(stdout), os.Getuid()
+	return string(stdout), os.Getuid(), nil
 }

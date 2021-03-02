@@ -6,24 +6,43 @@ import (
 
 	"github.com/AnVeliz/docker-installer/installers"
 	"github.com/AnVeliz/docker-installer/utils/system"
+	"github.com/AnVeliz/docker-installer/utils/system/interactivity"
 )
 
 type fakeOsDetector struct {
 	fakeOsInfo   system.OsInfo
 	fakeUserInfo system.UserInfo
+	err          error
 }
 
-func (osDetector fakeOsDetector) GetOsInfo() (system.OsInfo, system.UserInfo) {
-	return osDetector.fakeOsInfo, osDetector.fakeUserInfo
+func (osDetector fakeOsDetector) GetOsInfo() (system.OsInfo, system.UserInfo, error) {
+	return osDetector.fakeOsInfo, osDetector.fakeUserInfo, osDetector.err
 }
 
 type fakeUserInteractor struct {
 	operationType installers.OperationType
 	err           error
+	io            fakeIoInteractor
 }
 
 func (interactor fakeUserInteractor) GetOperation() (installers.OperationType, error) {
 	return interactor.operationType, interactor.err
+}
+
+func (interactor fakeUserInteractor) IO() interactivity.IO {
+	return interactor.io
+}
+
+type fakeIoInteractor struct {
+	rn  rune
+	err error
+}
+
+func (fakeInteractor fakeIoInteractor) PrintMessage(message ...string) {
+}
+
+func (fakeInteractor fakeIoInteractor) GetRune() (rune, error) {
+	return fakeInteractor.rn, fakeInteractor.err
 }
 
 func TestInstallSupportedOss(t *testing.T) {
@@ -141,7 +160,7 @@ func TestNotSpecifiedOperationSupportedOss(t *testing.T) {
 	}
 
 	err := Run(detector, interactor)
-	if err != nil {
+	if err == nil || err.Error() != "Unexpected operation requested" {
 		t.Error("Run function result is wrong:", err.Error())
 	}
 }
@@ -157,12 +176,39 @@ func TestUserInputError(t *testing.T) {
 			Name:   "root",
 			UserID: 0,
 		},
+		err: nil,
 	}
 
 	errMsg := "Dummy error"
 	interactor := fakeUserInteractor{
 		operationType: installers.Install,
 		err:           errors.New(errMsg),
+	}
+
+	err := Run(detector, interactor)
+	if err == nil || err.Error() != errMsg {
+		t.Error("Run function result is wrong:", err.Error())
+	}
+}
+
+func TestUserOsDetectorError(t *testing.T) {
+	errMsg := "Dummy error"
+	detector := fakeOsDetector{
+		fakeOsInfo: system.OsInfo{
+			OsClass:   system.Linux,
+			OsVersion: "10.10",
+			OsName:    "Manjaro",
+		},
+		fakeUserInfo: system.UserInfo{
+			Name:   "root",
+			UserID: 0,
+		},
+		err: errors.New(errMsg),
+	}
+
+	interactor := fakeUserInteractor{
+		operationType: installers.Install,
+		err:           nil,
 	}
 
 	err := Run(detector, interactor)

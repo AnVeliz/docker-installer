@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/AnVeliz/docker-installer/installers"
 	"github.com/AnVeliz/docker-installer/installers/docker"
@@ -12,7 +11,10 @@ import (
 
 // Run is a start point
 func Run(osDetector system.IOsDetector, userInteractor user.Interactor) error {
-	osInfo, userInfo := osDetector.GetOsInfo()
+	osInfo, userInfo, err := osDetector.GetOsInfo()
+	if err != nil {
+		return err
+	}
 	if userInfo.UserID != 0 {
 		return errors.New("Application should run as root")
 	}
@@ -27,7 +29,7 @@ func Run(osDetector system.IOsDetector, userInteractor user.Interactor) error {
 	if installer == nil {
 		return errors.New("No compatible installer has been found")
 	}
-	fmt.Println("Installer has been found")
+	userInteractor.IO().PrintMessage("Installer has been found")
 
 	switch operation {
 	case installers.Install:

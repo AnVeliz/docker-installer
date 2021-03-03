@@ -1,7 +1,6 @@
 package docker
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -42,12 +41,6 @@ func TestInstall(t *testing.T) {
 	dockerInstaller := CreateInstaller(commandRunner)
 	dockerInstaller.Install()
 
-	fmt.Println("===What we get START===")
-	for _, value := range commandRunner.fullOutput {
-		fmt.Println(value)
-	}
-	fmt.Println("===What we get END===")
-
 	expected := []string{
 		"apt-get --yes --force-yes remove docker docker-engine docker.io containerd runc docker-ce docker-ce-cli containerd.io",
 		"apt-get update",
@@ -68,12 +61,6 @@ func TestUninstall(t *testing.T) {
 
 	dockerInstaller := CreateInstaller(commandRunner)
 	dockerInstaller.Uninstall()
-
-	fmt.Println("===What we get START===")
-	for _, value := range commandRunner.fullOutput {
-		fmt.Println(value)
-	}
-	fmt.Println("===What we get END===")
 
 	expected := []string{
 		"apt-get --yes --force-yes remove docker docker-engine docker.io containerd runc docker-ce docker-ce-cli containerd.io",

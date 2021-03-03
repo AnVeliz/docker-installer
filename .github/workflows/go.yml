@@ -39,6 +39,8 @@ jobs:
       with:
       # Additional arguments to the sonarcloud scanner
         args: >
+          -Dsonar.organization=anveliz
+          -Dsonar.projectKey=AnVeliz_docker-installer
           -Dsonar.test.exclusions=*/**/*_test.go
           -Dsonar.python.coverage.reportPaths=coverage.lcov
       # Set the sonar.projectBaseDir analysis property

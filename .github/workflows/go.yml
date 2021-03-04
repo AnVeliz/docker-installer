@@ -42,6 +42,8 @@ jobs:
           -Dsonar.organization=anveliz
           -Dsonar.projectKey=AnVeliz_docker-installer
           -Dsonar.test.exclusions=*/**/*_test.go
+          -Dsonar.coverage.exclusions=*/**/*_test.go
+          -Dsonar.cpd.exclusions=*/**/*_test.go
           -Dsonar.go.coverage.reportPaths=coverage.out
       # Set the sonar.projectBaseDir analysis property
         # projectBaseDir: # optional, default is .
